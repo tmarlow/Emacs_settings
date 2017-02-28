@@ -4,3 +4,5 @@ elpa/
 backups/
 /ido.last
 /places
+/smex-items
+themes
