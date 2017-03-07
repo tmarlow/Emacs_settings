@@ -366,7 +366,7 @@
                  (not (looking-at "\\w\\|\\s_")))
         (company-complete-common))))))
 
-(define-key company-mode-map (kbd "<tab>") 'my-company-indent-or-complete-common)
+;;(define-key company-mode-map (kbd "<tab>") 'my-company-indent-or-complete-common)
 
 ;; not sure why this should be set in a hook, but that is how the manual says to do it.
 (add-hook 'after-init-hook 'global-company-mode)
@@ -399,3 +399,91 @@
 (setq comint-scroll-to-bottom-on-input t)
 (setq comint-scroll-to-bottom-on-output t)
 (setq comint-move-point-for-output t)
+
+
+;; ESS settings
+(require 'ess-site)
+
+(add-to-list 'auto-mode-alist '("\\.Rnw\\'" . Rnw-mode))
+(add-to-list 'auto-mode-alist '("\\.Snw\\'" . Rnw-mode))
+(add-to-list 'auto-mode-alist '("\\.Rmd\\'" . Rnw-mode))
+
+;; Make TeX and RefTex aware of Snw and Rnw files
+(setq reftex-file-extensions
+      '(("Snw" "Rnw" "nw" "tex" ".tex" ".ltx") ("bib" ".bib")))
+(setq TeX-file-extensions
+      '("Snw" "Rnw" "nw" "tex" "sty" "cls" "ltx" "texi" "texinfo"))
+
+;; Lets you do 'C-c C-c Sweave' from your Rnw file
+(add-hook 'Rnw-mode-hook
+	  (lambda ()
+	    (add-to-list 'TeX-command-list
+			 '("Sweave" "R CMD Sweave %s"
+			   TeX-run-command nil (latex-mode) :help "Run Sweave") t)
+	    (add-to-list 'TeX-command-list
+			 '("LatexSweave" "%l %(mode) %s"
+			   TeX-run-TeX nil (latex-mode) :help "Run Latex after Sweave") t)
+	    (setq TeX-command-default "Sweave")))
+
+
+;; set knitr to sweave documents
+(setq ess-swv-processor "'knitr")
+
+;; Make shift-enter do a lot in ess 
+(setq ess-ask-for-ess-directory nil)
+  (setq ess-local-process-name "R")
+  (setq ansi-color-for-comint-mode 'filter)
+  (setq comint-scroll-to-bottom-on-input t)
+  (setq comint-scroll-to-bottom-on-output t)
+  (setq comint-move-point-for-output t)
+  (defun my-ess-start-R ()
+    (interactive)
+    (if (not (member "*R*" (mapcar (function buffer-name) (buffer-list))))
+      (progn
+	(delete-other-windows)
+	(setq w1 (selected-window))
+	(setq w1name (buffer-name))
+	(setq w2 (split-window w1 nil t))
+	(R)
+	(set-window-buffer w2 "*R*")
+	(set-window-buffer w1 w1name))))
+  (defun my-ess-eval ()
+    (interactive)
+    (my-ess-start-R)
+    (if (and transient-mark-mode mark-active)
+	(call-interactively 'ess-eval-region)
+      (call-interactively 'ess-eval-line-and-step)))
+  (add-hook 'ess-mode-hook
+	    '(lambda()
+	       (local-set-key [(shift return)] 'my-ess-eval)))
+  (add-hook 'inferior-ess-mode-hook
+	    '(lambda()
+	       (local-set-key [C-up] 'comint-previous-input)
+	       (local-set-key [C-down] 'comint-next-input)))
+ (add-hook 'Rnw-mode-hook 
+          '(lambda() 
+             (local-set-key [(shift return)] 'my-ess-eval))) 
+  (require 'ess-site)
+
+;; uniquify names 
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)  
+
+;;lintr and flycheck
+(add-hook 'after-init-hook #'global-flycheck-mode)
+  (add-hook 'ess-mode-hook
+            (lambda () (flycheck-mode t)))
+
+
+;; C-x o goes to the next window, Shift+direction arrow moves between frames.
+
+(require 'framemove)
+(windmove-default-keybindings)
+(setq framemove-hook-into-windmove t)
+;; replace disputed key in org-mode so framemove works 
+(setq org-replace-disputed-keys t) 
+
+;; pandoc setq
+(setq pandoc-use-async nil)
+
+
