@@ -112,7 +112,9 @@
  '(custom-safe-themes
    (quote
     ("ace9f12e0c00f983068910d9025eefeb5ea7a711e774ee8bb2af5f7376018ad2" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default)))
- '(package-selected-packages (quote (pandoc-mode pandoc writeroom-mode magit)))
+ '(package-selected-packages
+   (quote
+    (zotxt polymode ess-view pandoc-mode pandoc writeroom-mode magit)))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
 (custom-set-faces
@@ -487,3 +489,16 @@
 (setq pandoc-use-async nil)
 
 
+;; require ess-view for viewing spreadsheets of dataframes
+(require 'ess-view)
+
+;; Polymode to allow editing and running chunks of R-markdown files
+(require 'poly-R)
+(require 'poly-markdown)
+;;; polymode + markdown
+(add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+
+;;; polymode + R
+(add-to-list 'auto-mode-alist '("\\.Snw" . poly-noweb+r-mode))
+(add-to-list 'auto-mode-alist '("\\.Rnw" . poly-noweb+r-mode))
+(add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
